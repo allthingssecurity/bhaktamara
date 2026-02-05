@@ -141,6 +141,24 @@ button {
   gap: 12px;
 }
 
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--primary);
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.lang-toggle:hover {
+  background: var(--primary-dark);
+  transform: scale(1.05);
+}
+
 .header-stat {
   display: flex;
   align-items: center;

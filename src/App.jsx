@@ -1,13 +1,68 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Pause, ChevronLeft, ChevronRight, Volume2, Star, Sparkles, BookOpen, Heart, Menu, X, Home, Trophy, Settings } from 'lucide-react'
+import { Play, Pause, ChevronLeft, ChevronRight, Volume2, Star, Sparkles, BookOpen, Heart, Menu, X, Home, Trophy, Globe } from 'lucide-react'
 import { stotras, getTodaysStora } from './data/stotras'
 import './App.css'
+
+// Hindi explanations for kids
+const hindiExplanations = {
+  1: "कल्पना करो कि प्यार से झुकने वाले देवताओं के मुकुटों पर चमकते हुए रत्न हैं! उनका प्रकाश सारे अंधकार को दूर कर देता है। भगवान आदिनाथ के चरण एक मजबूत रस्सी की तरह हैं जो समुद्र में डूबते लोगों को बचाती है।",
+  2: "स्वर्ग के सबसे बुद्धिमान देवता भगवान आदिनाथ की सुंदर गीतों से स्तुति करते हैं! उनके गीत इतने अद्भुत हैं कि तीनों लोकों में सभी उन्हें सुनना पसंद करते हैं।",
+  3: "भले ही मैं बहुत बुद्धिमान नहीं हूं, जब मैं भगवान आदिनाथ की स्तुति करने की कोशिश करता हूं, तो सुंदर शब्द जादू की तरह बहने लगते हैं!",
+  4: "भगवान आदिनाथ में इतने अच्छे गुण हैं - एक अंतहीन समुद्र की तरह! स्वर्ग का सबसे बुद्धिमान शिक्षक भी उन सबका वर्णन नहीं कर सकता।",
+  5: "भले ही मैं इसमें बहुत अच्छा नहीं हूं, भगवान आदिनाथ के लिए मेरा प्यार मुझे कोशिश करने के लिए प्रेरित करता है! जैसे एक मां हिरणी अपने बच्चे की रक्षा के लिए बहादुरी से शेर का सामना करती है।",
+  6: "मुझे ज्यादा कुछ नहीं पता और बुद्धिमान लोग मुझ पर हंस सकते हैं। लेकिन भगवान आदिनाथ के लिए मेरा प्यार मुझे गाने के लिए मजबूर करता है!",
+  7: "जब हम भगवान आदिनाथ की स्तुति करते हैं, तो हमने जो भी बुरे काम किए हैं वे जल्दी से गायब हो जाते हैं - जादू की तरह!",
+  8: "भगवान आदिनाथ की मदद से, मुझ जैसा कोई भी सुंदर स्तुति लिख सकता है! यह कमल के पत्ते पर एक छोटी पानी की बूंद की तरह है जो मोती जैसी चमकदार हो जाती है!",
+  9: "भगवान आदिनाथ की स्तुति करने से हमारी सभी गलतियां दूर हो जाती हैं! उनके बारे में बात करना भी सभी की मदद करता है!",
+  10: "जब हम सच्चे दिल से भगवान आदिनाथ की स्तुति करते हैं, तो हम उनके जैसे बन सकते हैं! भगवान आदिनाथ हमारे साथ अपनी अच्छाई साझा करते हैं!",
+  11: "एक बार जब आप भगवान आदिनाथ को देख लेते हैं, तो आप देखना बंद नहीं कर सकते - वे बहुत सुंदर हैं!",
+  12: "भगवान आदिनाथ विशेष, शांतिपूर्ण, चमकते परमाणुओं से बने थे! पूरे ब्रह्मांड में कोई और उनके जितना अद्भुत नहीं दिखता!",
+  13: "भगवान आदिनाथ का चेहरा इतना सुंदर है कि हर कोई उसे देखना बंद नहीं कर सकता! उनके चेहरे की तुलना में, चांद भी पीला दिखता है!",
+  14: "भगवान आदिनाथ के अच्छे गुण पूर्णिमा से भी अधिक चमकते हैं! जो कोई भी उनकी शरण लेता है वह जहां चाहे जा सकता है!",
+  15: "सबसे सुंदर देवदूतियां भी भगवान आदिनाथ को विचलित नहीं कर सकीं! उनका मन पूरी तरह शांत रहा।",
+  16: "भगवान आदिनाथ का चेहरा सबसे सुंदर चांद की तरह चमकता है - कोई दीपक या असली चांद भी इसकी तुलना नहीं कर सकता!",
+  17: "कुछ लोगों ने भगवान आदिनाथ से कई जन्मों से प्यार किया है! उनके लिए, भगवान के बारे में सुंदर शब्द सुनना सबसे अच्छा उपहार है!",
+  18: "भगवान आदिनाथ के शब्द इतने शक्तिशाली और सुंदर हैं कि उन्हें किसी सजावट की जरूरत नहीं है! वे पहले से ही परिपूर्ण हैं!",
+  19: "भगवान आदिनाथ को देखने के बाद, विष्णु और शिव जैसे अन्य महान देवता भी कम अद्भुत लगते हैं!",
+  20: "भगवान आदिनाथ अतिरिक्त विशेष हैं - देवता, मनुष्य और सिद्ध सभी उनकी पूजा करते हैं क्योंकि वे सभी को मुक्त होने में मदद कर सकते हैं!",
+  21: "बुद्धिमान ऋषि कहते हैं कि भगवान आदिनाथ एक चमकदार सूरज की तरह हैं - शुद्ध और सभी अंधकार से परे!",
+  22: "अच्छे लोग भगवान आदिनाथ का कई तरह से वर्णन करते हैं: वे कभी नहीं बदलते, वे हर जगह हैं, और वे शुद्ध ज्ञान हैं!",
+  23: "भगवान आदिनाथ को बुद्ध कहा जाता है क्योंकि देवता उनकी बुद्धि की पूजा करते हैं! वे वास्तव में सबसे महान व्यक्ति हैं!",
+  24: "मैं भगवान आदिनाथ को प्रणाम करता हूं जो सबके दुख दूर करते हैं! मैं सभी लोकों के सबसे बड़े स्वामी को प्रणाम करता हूं!",
+  25: "भगवान आदिनाथ अच्छे गुणों से इतने भरे हुए हैं कि किसी बुरी चीज के लिए कोई जगह नहीं है!",
+  26: "भगवान आदिनाथ एक सुंदर अशोक के पेड़ के नीचे बैठते हैं और प्रकाश से चमकते हैं!",
+  27: "भगवान आदिनाथ का शरीर शुद्ध सोने की तरह चमकता है! उनके चारों ओर सुंदर सफेद पंखे लहराते हैं!",
+  28: "भगवान आदिनाथ के ऊपर तीन सुंदर छत्र तैरते हैं जो सबको बताते हैं कि वे तीनों लोकों के राजा हैं!",
+  29: "भगवान आदिनाथ के लिए आकाश में जादुई ढोल बजते हैं! उनकी गहरी आवाजें हर दिशा में भर जाती हैं!",
+  30: "भगवान आदिनाथ के शाही दरबार में आकाश से जादुई फूलों की वर्षा होती है!",
+  31: "यहां तक कि देवताओं के राजा इंद्र और अन्य सभी देवता भी भगवान आदिनाथ को प्रणाम करते हैं!",
+  32: "कमल जैसी आंखों वाली सुंदर देवदूतियां भगवान आदिनाथ की सेवा करती हैं, ठंडे पंखे लहराती हैं!",
+  33: "भगवान आदिनाथ की भुजाएं कपूर की तरह शुद्ध सफेद हैं! जब मैं उन्हें प्रणाम करता हूं, तो मेरी सारी गलतियां भाग जाती हैं!",
+  34: "भगवान आदिनाथ एक भव्य सिंहासन पर बैठते हैं और लहराते पंखों की रोशनी से चमकते हैं!",
+  35: "भगवान आदिनाथ का सुंदर कमल जैसा चेहरा हमेशा मेरे दिल में चमके और कभी न जाए - सपनों में भी!",
+  36: "मुझे भगवान आदिनाथ की स्तुति करने में शर्म नहीं आती भले ही मैं इसमें बहुत अच्छा नहीं हूं!",
+  37: "भगवान आदिनाथ के लिए मेरा प्यार मुझे उनकी स्तुति करने के लिए मजबूर करता है!",
+  38: "भगवान आदिनाथ के लिए थोड़ा सा प्यार भी बड़े प्यार के बराबर है! कृपया मेरी छोटी भेंट स्वीकार करें!",
+  39: "मैंने भगवान आदिनाथ के लिए उनके अद्भुत गुणों से बुनी हुई प्रशंसाओं की एक सुंदर माला बनाई!",
+  40: "मैंने ये प्रशंसाएं अपने पूरे दिल से भगवान आदिनाथ को खुश करने के लिए लिखीं! हमेशा के लिए भगवान के साथ मित्र!",
+  41: "अगर आप हर दिन प्यार से भगवान आदिनाथ की इन स्तुतियों को पढ़ते हैं, तो अद्भुत चीजें होती हैं!",
+  42: "इस विशेष भजन को स्वर्ग के जादुई प्राणियों द्वारा आशीर्वाद दिया गया है!",
+  43: "जो लोग हर दिन मुस्कान के साथ खुशी से इन सुंदर स्तुतियों को पढ़ते हैं उन्हें अद्भुत उपहार मिलते हैं!",
+  44: "मैं भगवान आदिनाथ के चरणों को प्रणाम करता हूं - वे समय की शुरुआत से डूबते लोगों को बचाते आ रहे हैं!",
+  45: "जो लोग हर शाम भगवान आदिनाथ की पूजा करते हैं वे सभी डरावनी चीजों से मुक्त हो जाएंगे!",
+  46: "अगर आप हमेशा रहने वाली खुशी चाहते हैं तो भगवान आदिनाथ की इन स्तुतियों को गाएं!",
+  47: "हम भगवान ऋषभ की पूजा करते हैं जो सूरज की तरह चमकते हैं! वे शुद्ध हैं और सभी को अद्भुत आशीर्वाद देते हैं!",
+  48: "यह विशेष भक्तामर प्रार्थना बुद्धिमान ऋषि मानतुंग द्वारा लिखी गई थी! ये जादुई शब्द सभी को आशीर्वाद देते हैं!"
+}
 
 function App() {
   const [currentStotra, setCurrentStotra] = useState(() => {
     const saved = localStorage.getItem('lastViewedStotra')
     return saved ? stotras.find(s => s.id === parseInt(saved)) || stotras[0] : stotras[0]
+  })
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('language') || 'en'
   })
   const [isPlaying, setIsPlaying] = useState(false)
   const [showMeaning, setShowMeaning] = useState(false)
@@ -35,6 +90,21 @@ function App() {
   useEffect(() => {
     localStorage.setItem('lastViewedStotra', currentStotra.id.toString())
   }, [currentStotra])
+
+  useEffect(() => {
+    localStorage.setItem('language', language)
+  }, [language])
+
+  const toggleLanguage = () => {
+    setLanguage(lang => lang === 'en' ? 'hi' : 'en')
+  }
+
+  const getKidsExplanation = () => {
+    if (language === 'hi' && hindiExplanations[currentStotra.id]) {
+      return hindiExplanations[currentStotra.id]
+    }
+    return currentStotra.forKids
+  }
 
   const goToStotra = (id) => {
     const stotra = stotras.find(s => s.id === id) || stotras[0]
@@ -65,6 +135,22 @@ function App() {
 
   const playAudio = async () => {
     setIsPlaying(true)
+    const text = getKidsExplanation()
+
+    // For Hindi, use browser TTS (better Hindi support)
+    // For English, try NVIDIA audio first, then fallback to browser TTS
+    if (language === 'hi') {
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.lang = 'hi-IN'
+      utterance.rate = 0.9
+      utterance.pitch = 1.0
+      utterance.onend = () => setIsPlaying(false)
+      utterance.onerror = () => setIsPlaying(false)
+      speechSynthesis.speak(utterance)
+      return
+    }
+
+    // English - try NVIDIA audio first
     const audioPath = `${import.meta.env.BASE_URL}audio/stotra_${currentStotra.id}.wav`
 
     try {
@@ -74,7 +160,8 @@ function App() {
         audioRef.current.onended = () => setIsPlaying(false)
         audioRef.current.onerror = () => {
           // Fallback to Web Speech API
-          const utterance = new SpeechSynthesisUtterance(currentStotra.forKids)
+          const utterance = new SpeechSynthesisUtterance(text)
+          utterance.lang = 'en-US'
           utterance.rate = 0.85
           utterance.pitch = 1.1
           utterance.onend = () => setIsPlaying(false)
@@ -82,7 +169,8 @@ function App() {
         }
       }
     } catch (e) {
-      const utterance = new SpeechSynthesisUtterance(currentStotra.forKids)
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.lang = 'en-US'
       utterance.rate = 0.85
       utterance.pitch = 1.1
       utterance.onend = () => setIsPlaying(false)
@@ -223,6 +311,10 @@ function App() {
           </div>
         </div>
         <div className="header-right">
+          <button className="lang-toggle" onClick={toggleLanguage}>
+            <Globe size={16} />
+            <span>{language === 'en' ? 'EN' : 'हि'}</span>
+          </button>
           <div className="header-stat">
             <div className="stat-circle">
               <svg viewBox="0 0 36 36">
@@ -309,8 +401,8 @@ function App() {
                   {isPlaying ? <Pause size={24} /> : <Play size={24} />}
                 </div>
                 <div className="audio-btn-text">
-                  <span className="audio-btn-label">{isPlaying ? 'Pause' : 'Listen'}</span>
-                  <span className="audio-btn-sub">AI Voice</span>
+                  <span className="audio-btn-label">{isPlaying ? (language === 'en' ? 'Pause' : 'रुकें') : (language === 'en' ? 'Listen' : 'सुनें')}</span>
+                  <span className="audio-btn-sub">{language === 'en' ? 'AI Voice' : 'आवाज़'}</span>
                 </div>
                 {isPlaying && (
                   <div className="audio-waves">
@@ -328,7 +420,7 @@ function App() {
                 whileTap={{ scale: 0.98 }}
               >
                 <Heart size={20} fill={showMeaning ? 'currentColor' : 'none'} />
-                <span>{showMeaning ? 'Hide Explanation' : 'What Does It Mean?'}</span>
+                <span>{showMeaning ? (language === 'en' ? 'Hide Explanation' : 'व्याख्या छुपाएं') : (language === 'en' ? 'What Does It Mean?' : 'इसका क्या अर्थ है?')}</span>
                 <ChevronRight size={20} className={`toggle-arrow ${showMeaning ? 'open' : ''}`} />
               </motion.button>
 
@@ -345,9 +437,9 @@ function App() {
                       <div className="meaning-kids">
                         <div className="meaning-kids-header">
                           <span className="meaning-kids-icon">✨</span>
-                          <h4>Simple Explanation</h4>
+                          <h4>{language === 'en' ? 'Simple Explanation' : 'सरल व्याख्या'}</h4>
                         </div>
-                        <p>{currentStotra.forKids}</p>
+                        <p>{getKidsExplanation()}</p>
                       </div>
                       <div className="meaning-full">
                         <h4>Full Translation</h4>
